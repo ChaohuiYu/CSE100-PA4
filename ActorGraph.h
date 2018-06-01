@@ -11,18 +11,31 @@
 #define ACTORGRAPH_H
 
 #include <iostream>
+#include <unordered_map>
+#include <vector>
+#include "ActorNode.h"
+#include "Movie.h"
+#include <string>
 
 // Maybe include some data structures here
 
 using namespace std;
 
 class ActorGraph {
-    protected:
+    public:
 
         // Maybe add class data structure(s) here
-
-    public:
+        unordered_map<string, ActorNode*> actorGraph;
+	unordered_map<string, Movie*> movieGraph;
+        
         ActorGraph(void);
+
+	/* Fills adjecency list */
+	void search(string one, string two, char* filename);
+
+	/* Resets node pointers */
+        void reset();  
+
 
         // Maybe add some more methods here
 
