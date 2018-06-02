@@ -11,6 +11,8 @@
 #define ACTORGRAPH_H
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <unordered_map>
 #include <vector>
 #include "ActorNode.h"
@@ -31,7 +33,7 @@ class ActorGraph {
         ActorGraph(void);
 
 	/* Fills adjecency list */
-	void search(string one, string two, char* filename);
+	void search(string one, string two, ofstream& outfile);
 
 	/* Resets node pointers */
         void reset();  

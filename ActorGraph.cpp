@@ -31,7 +31,6 @@ bool ActorGraph::loadFromFile(const char* in_filename, bool use_weighted_edges) 
     // keep reading lines until the end of file is reached
     while (infile) {
         string s;
-
         // get the next line
         if (!getline( infile, s )) break;
 
@@ -40,7 +39,6 @@ bool ActorGraph::loadFromFile(const char* in_filename, bool use_weighted_edges) 
             have_header = true;
             continue;
         }
-
         istringstream ss( s );
         vector <string> record;
 
@@ -52,12 +50,10 @@ bool ActorGraph::loadFromFile(const char* in_filename, bool use_weighted_edges) 
 
             record.push_back( next );
         }
-
         if (record.size() != 3) {
             // we should have exactly 3 columns
             continue;
         }
-
         string actor_name(record[0]);
         string movie_title(record[1]);
         int movie_year = stoi(record[2]);
@@ -79,7 +75,6 @@ bool ActorGraph::loadFromFile(const char* in_filename, bool use_weighted_edges) 
         ActorNode* tmp = actorGraph.at(actor_name);
 	tmp->movieList.push_back(titleYear);
 
-
 	// Create a movie node, if doesn't already exist.
 	auto checker2 = movieGraph.find(titleYear);
 	if (checker2 == movieGraph.end()){
@@ -88,9 +83,7 @@ bool ActorGraph::loadFromFile(const char* in_filename, bool use_weighted_edges) 
 	 // cout << "adding Movie node to graph" << endl;
 	}
         Movie* tmp2 = movieGraph.at(titleYear);
-	tmp2->actorList.push_back(actor_name);
-	
-
+	tmp2->actorList.push_back(actor_name);	
     }
 
 
@@ -109,7 +102,7 @@ bool ActorGraph::loadFromFile(const char* in_filename, bool use_weighted_edges) 
 /*
  * Search method to traverse graph and find path between actors
  */ 
-void ActorGraph::search(string one, string two, char* filename){
+void ActorGraph::search(string one, string two, ofstream& outfile){
   queue<ActorNode*> queue; // Used for BFS
   stack<ActorNode*> stack; // Used for returning path
   bool check = false;
@@ -153,12 +146,10 @@ void ActorGraph::search(string one, string two, char* filename){
   }
 
   // Printing out path.
-  ofstream outfile(filename); // Ofstream
-  // Writing the header
-  outfile << "(actor)--[movie#@year]-->(actor)--...\n";
-  
   iter = stack.top();
-  outfile << "(" << iter->actorName << ")"; 
+  outfile << "(";
+  outfile << iter->actorName;
+  outfile << ")"; 
   stack.pop();
 
   while (!stack.empty()){
@@ -169,7 +160,6 @@ void ActorGraph::search(string one, string two, char* filename){
     stack.pop();
   }
   outfile << "\n";
-  outfile.close();
   // Reseting pointers
   reset();
 

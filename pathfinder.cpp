@@ -16,16 +16,25 @@ int main(int argc, char* argv[]){
   graph->loadFromFile(argv[1],argv[2]);
 
   // Reading in from file 
+  
   ifstream infile(argv[3]);
+  ofstream stream; // Ofstream
+  stream.open(argv[4], ios::out);
+  // Writing the header
+  stream << "(actor)--[movie#@year]-->(actor)--...\n";
+
   
   bool have_header = false;
 
   // Keep reading lines until EOF is reached.
   while (infile){
+
+    //cout << "Inside pathfinder reading infile" << endl;
     string s;
    
     // Get the next line
     if (!getline(infile,s)) break;
+    //cout << "string s: " << s << endl;
 
     if (!have_header){
       //skip the header
@@ -37,6 +46,7 @@ int main(int argc, char* argv[]){
     vector<string> record;
 
     while (ss) {
+      //cout << "ss loop" << endl;
       string next;
 
       // get the next string before the tab char
@@ -46,14 +56,24 @@ int main(int argc, char* argv[]){
 
     if (record.size() != 2){
 	// We should have exactly 2 columns
+	//cout << "record.size: " << record.size() << endl;
 	continue;
     }
-    string actor1(record[0]);
-    string actor2(record[1]);
-    
-    graph->search(actor1, actor2, argv[3]);
+    string actor1 = record[0];
+    string actor2 = record[1];
+    //cout << "Actor1: " << actor1 << endl;
+    //cout << "Actor2: " << actor2 << endl;
+
+    graph->search(actor1, actor2, stream);
 
   }
+
+  if (!infile.eof()) {
+        cerr << "Failed to read " << argv[1] << "!\n";
+        return false;
+  }
+  infile.close();
+  stream.close();
 
   
   //std::cout << "ActorGraph size: " << graph->actorGraph.size() << "\n";
