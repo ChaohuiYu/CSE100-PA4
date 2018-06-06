@@ -102,49 +102,130 @@ bool ActorGraph::loadFromFile(const char* in_filename, bool use_weighted_edges) 
 /*
  * Search method to traverse graph and find path between actors
  */ 
-void ActorGraph::search(string one, string two, ofstream& outfile){
+void ActorGraph::search(string one, string two, ofstream& outfile, string version, bool connections){
   queue<ActorNode*> queue; // Used for BFS
+  // Used for pathfinder
+  priority_queue<ActorNode*, vector<ActorNode*>, CompareNodes> pq;
+  // Used for actorconnections
+  priority_queue<ActorNode*, vector<ActorNode*>, CompareNodesConnection> pqc; 
   stack<ActorNode*> stack; // Used for returning path
   bool check = false;
+  ActorNode *actor;
   
   // Gets starting actor node
   ActorNode *originalActor = actorGraph.at(one);
-  queue.push(originalActor);
+  originalActor->bandwidth = 2147483647;
   
-  while (!queue.empty()){
-    ActorNode *actor = queue.front();
-    queue.pop();
-    if (actor->actorName == two){
-      stack.push(actor);
-      break;
+  // Unweighted version
+  if (version == "u"){
+    queue.push(originalActor);
+  }
+  else if (version == "w" && connections == false){
+    pq.push(originalActor);
+  }
+  else if (version == "w" && connections == true){
+    cout << "Inside pqc" << endl;
+    pqc.push(originalActor);
+  }
+ 
+  //cout << "Size of queue: " << queue.size() << endl;
+  //cout << "Size of pq: " << pq.size() << endl;
+  while (!queue.empty() || !pq.empty() || !pqc.empty()){
+    // If unweighted
+    if (version == "u"){
+      cout << "actor = queue.front in unweighted" << endl;
+      actor = queue.front();
+      queue.pop();
+      if (actor->actorName == two){
+        stack.push(actor);
+        break;
+      }
     }
-    // Goes through each movie in the actors list, and through each actor (edge)  
+
+    // If weighted
+    else if (version == "w" && connections == false){
+      cout << "actor = pq.top(), weighted" << endl;
+      actor = pq.top();
+	//cout << "actor: " << actor->actorName << endl;
+      pq.pop();
+    }
+
+    // If weighted and actorconnections
+    else if (version == "w" && connections == true){
+	cout << "actor = pqc.top(), weighted, true" << endl;
+      actor = pqc.top();
+      pqc.pop();
+    }
+
+    // Goes through each movie in the actors list, and through each actor(edge)
     for (int index = 0; index < actor->movieList.size(); index++){
       string movieName = actor->movieList.at(index);
+	//cout << "movieName of actor: " << movieName << endl;
       Movie *movie = movieGraph.at(movieName);
     
       // For each movie, go through each actor and set their
       // prev Node to the original actor and add them to queue
       for (int index2 = 0; index2 < movie->actorList.size(); index2++){
         string actorsName = movie->actorList.at(index2);
+	//cout << "actors name: " << actorsName << " in movie: " << movieName << endl;
         ActorNode *tmpActor = actorGraph.at(actorsName);
-        if (tmpActor->prev == nullptr){
+
+	// If weighted 
+	if (movie->weight + actor->totalDist < tmpActor->totalDist && actorsName != actor->actorName && version == "w" && connections == false){
+	  //cout << "if movie weight < actor prevWeight" << endl;
+	  tmpActor->prev = actor;
+	  tmpActor->prevMovie = movieName;
+	  tmpActor->prevMovieWeight = movie->weight;
+          tmpActor->totalDist = movie->weight + actor->totalDist;
+	  pq.push(tmpActor);
+        } 
+	//cout << "actor->bandwidth = " << actor->bandwidth << endl;
+	//cout << "movie->weight = " << movie->weight << endl;
+	//cout << "tmpActor->bandwidth = " << tmpActor->bandwidth << endl;
+	//cout << "min(actor, weight) = " << std::min(actor->bandwidth,movie->weight) << endl;
+	// If weighted but looking for widest path
+	if (std::min(actor->bandwidth,movie->weight) > tmpActor->bandwidth && version == "w" && connections == true){
+	cout << "yoo" << endl;
+	  tmpActor->prev = actor;
+	  tmpActor->prevMovie = movieName;
+	  tmpActor->prevMovieWeight = movie->weight;
+	  tmpActor->bandwidth = std::min(actor->bandwidth,movie->weight);
+	  pqc.push(tmpActor);
+        }
+	// If unweighted
+        else if (tmpActor->prev == nullptr && version == "u"){
+	  //cout << "if tmpActor prev == nullptr in unweighted" << endl;
           tmpActor->prev = actor;
           tmpActor->prevMovie = movieName;
           queue.push(tmpActor);
         }
       }
-      //cout << "Size of queue: " << queue.size() << endl;
     }
   }
 
+
+  if (version == "w" && connections == false){
+    ActorNode* end = actorGraph.at(two);
+    stack.push(end);
+  }
+  else if (version == "w" && connections == true){
+    cout << "going out" << endl;
+    ActorNode* newEnd = actorGraph.at(two);
+     cout << "movie: " << newEnd->prevMovie << endl; 
+    Movie *lastMovie = movieGraph.at(newEnd->prevMovie);
+    outfile << originalActor->actorName << "\t" <<
+	 newEnd->actorName << "\t" << lastMovie->year << endl;
+    return;
+  }
+  cout << "out of while loop, going to stack" << endl;
   // Creating path 
   ActorNode *iter = stack.top();
   while (iter->actorName != originalActor->actorName){
+    cout << "Pushing nodes into the stack" << endl;
     iter = iter->prev;  // Sets iter to prev node;
     stack.push(iter);
   }
-
+  cout << "Starting to print out path" << endl;
   // Printing out path.
   iter = stack.top();
   outfile << "(";
@@ -153,6 +234,7 @@ void ActorGraph::search(string one, string two, ofstream& outfile){
   stack.pop();
 
   while (!stack.empty()){
+    cout << "last while loop" << endl;
     iter = stack.top();
     string movieName = iter->prevMovie;
     Movie *movie = movieGraph.at(movieName);
@@ -161,7 +243,9 @@ void ActorGraph::search(string one, string two, ofstream& outfile){
   }
   outfile << "\n";
   // Reseting pointers
+  cout << "before reset" << endl;
   reset();
+  cout << "after reset" << endl;
 
 }  
 
@@ -173,5 +257,8 @@ void ActorGraph::reset(){
     ActorNode *tmp = (*iter).second;
     tmp->prev = nullptr;
     tmp->prevMovie = "";
+    tmp->prevMovieWeight = 2147483647;
+    tmp->totalDist = 2147483647;
+    tmp->bandwidth = 0;
   }
 }

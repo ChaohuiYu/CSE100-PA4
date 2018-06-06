@@ -22,7 +22,7 @@ pathfinder: ActorGraph.o Movie.o ActorNode.o
 
 # for final submission
 
-actorconnections: ActorGraph.o
+actorconnections: ActorGraph.o Movie.o ActorNode.o
 
 # include what ever source code *.h files ActorGraph relies on (these are merely the ones that were used in the solution)
 

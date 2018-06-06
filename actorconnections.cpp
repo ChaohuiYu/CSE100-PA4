@@ -13,15 +13,15 @@ int main(int argc, char* argv[]){
   }
 
   ActorGraph *graph = new ActorGraph();
-  graph->loadFromFile(argv[1],argv[2]);
+  graph->loadFromFile(argv[1],"w");
 
   // Reading in from file 
   
-  ifstream infile(argv[3]);
+  ifstream infile(argv[2]);
   ofstream stream; // Ofstream
-  stream.open(argv[4], ios::out);
+  stream.open(argv[3], ios::out);
   // Writing the header
-  stream << "(actor)--[movie#@year]-->(actor)--...\n";
+  stream << "Actor1\tActor2\tYear\n";
 
   
   bool have_header = false;
@@ -46,23 +46,29 @@ int main(int argc, char* argv[]){
     vector<string> record;
 
     while (ss) {
-      //cout << "ss loop" << endl;
       string next;
 
       // get the next string before the tab char
       if (!getline(ss, next, '\t')) break;
       record.push_back(next);
     }
-
     if (record.size() != 2){
 	// We should have exactly 2 columns
-	//cout << "record.size: " << record.size() << endl;
+	cout << "record.size: " << record.size() << endl;
 	continue;
     }
     string actor1 = record[0];
     string actor2 = record[1];
-    int searching = 1;
-    graph->search(actor1, actor2, stream, argv[2], false);
+    cout << "argv[4]: " << argv[4] << endl;
+    // Using widest path alg
+    string arg4 = argv[4];
+    if (arg4 == "widestp"){
+	 cout << "about to call search" << endl;
+      graph->search(actor1, actor2, stream, "w", true);
+    }
+    else{
+      cout << "didn't go into search" << endl;
+    }
   }
 
   if (!infile.eof()) {

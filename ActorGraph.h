@@ -23,6 +23,24 @@
 
 using namespace std;
 
+/* Used for weighted graph */
+class CompareNodes{
+  public:
+    bool operator()(ActorNode* n1, ActorNode* n2){
+      return n1->prevMovieWeight > n2->prevMovieWeight;
+    }
+};
+
+
+/* Used for actorconnections */
+class CompareNodesConnection{
+  public:
+    bool operator()(ActorNode* n1, ActorNode* n2){
+      return n1->bandwidth < n2->bandwidth;
+    }
+};
+
+
 class ActorGraph {
     public:
 
@@ -33,7 +51,7 @@ class ActorGraph {
         ActorGraph(void);
 
 	/* Fills adjecency list */
-	void search(string one, string two, ofstream& outfile);
+	void search(string one, string two, ofstream& outfile, string version, bool connections);
 
 	/* Resets node pointers */
         void reset();  
