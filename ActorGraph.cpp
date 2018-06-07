@@ -124,7 +124,6 @@ void ActorGraph::search(string one, string two, ofstream& outfile, string versio
     pq.push(originalActor);
   }
   else if (version == "w" && connections == true){
-    cout << "Inside pqc" << endl;
     pqc.push(originalActor);
   }
  
@@ -133,7 +132,6 @@ void ActorGraph::search(string one, string two, ofstream& outfile, string versio
   while (!queue.empty() || !pq.empty() || !pqc.empty()){
     // If unweighted
     if (version == "u"){
-      cout << "actor = queue.front in unweighted" << endl;
       actor = queue.front();
       queue.pop();
       if (actor->actorName == two){
@@ -144,7 +142,6 @@ void ActorGraph::search(string one, string two, ofstream& outfile, string versio
 
     // If weighted
     else if (version == "w" && connections == false){
-      cout << "actor = pq.top(), weighted" << endl;
       actor = pq.top();
 	//cout << "actor: " << actor->actorName << endl;
       pq.pop();
@@ -152,7 +149,6 @@ void ActorGraph::search(string one, string two, ofstream& outfile, string versio
 
     // If weighted and actorconnections
     else if (version == "w" && connections == true){
-	cout << "actor = pqc.top(), weighted, true" << endl;
       actor = pqc.top();
       pqc.pop();
     }
@@ -179,13 +175,8 @@ void ActorGraph::search(string one, string two, ofstream& outfile, string versio
           tmpActor->totalDist = movie->weight + actor->totalDist;
 	  pq.push(tmpActor);
         } 
-	//cout << "actor->bandwidth = " << actor->bandwidth << endl;
-	//cout << "movie->weight = " << movie->weight << endl;
-	//cout << "tmpActor->bandwidth = " << tmpActor->bandwidth << endl;
-	//cout << "min(actor, weight) = " << std::min(actor->bandwidth,movie->weight) << endl;
 	// If weighted but looking for widest path
-	if (std::min(actor->bandwidth,movie->weight) > tmpActor->bandwidth && version == "w" && connections == true){
-	cout << "yoo" << endl;
+	else if (std::min(actor->bandwidth,movie->weight) > tmpActor->bandwidth && version == "w" && connections == true){
 	  tmpActor->prev = actor;
 	  tmpActor->prevMovie = movieName;
 	  tmpActor->prevMovieWeight = movie->weight;
@@ -209,23 +200,28 @@ void ActorGraph::search(string one, string two, ofstream& outfile, string versio
     stack.push(end);
   }
   else if (version == "w" && connections == true){
-    cout << "going out" << endl;
+    ActorNode* finalNode = actorGraph.at(two);
     ActorNode* newEnd = actorGraph.at(two);
-     cout << "movie: " << newEnd->prevMovie << endl; 
-    Movie *lastMovie = movieGraph.at(newEnd->prevMovie);
+    int smallestBand = 0;
+    while (newEnd->actorName != originalActor->actorName){
+      Movie *newMovie = movieGraph.at(newEnd->prevMovie);
+      if (newMovie->year > smallestBand){
+        smallestBand = newMovie->year;
+      }
+      newEnd = newEnd->prev; // Sets newIter to prev node;
+    }
+
     outfile << originalActor->actorName << "\t" <<
-	 newEnd->actorName << "\t" << lastMovie->year << endl;
+	 finalNode->actorName << "\t" << smallestBand << endl;
+    reset();
     return;
   }
-  cout << "out of while loop, going to stack" << endl;
   // Creating path 
   ActorNode *iter = stack.top();
   while (iter->actorName != originalActor->actorName){
-    cout << "Pushing nodes into the stack" << endl;
     iter = iter->prev;  // Sets iter to prev node;
     stack.push(iter);
   }
-  cout << "Starting to print out path" << endl;
   // Printing out path.
   iter = stack.top();
   outfile << "(";
@@ -234,7 +230,6 @@ void ActorGraph::search(string one, string two, ofstream& outfile, string versio
   stack.pop();
 
   while (!stack.empty()){
-    cout << "last while loop" << endl;
     iter = stack.top();
     string movieName = iter->prevMovie;
     Movie *movie = movieGraph.at(movieName);
@@ -243,9 +238,7 @@ void ActorGraph::search(string one, string two, ofstream& outfile, string versio
   }
   outfile << "\n";
   // Reseting pointers
-  cout << "before reset" << endl;
   reset();
-  cout << "after reset" << endl;
 
 }  
 

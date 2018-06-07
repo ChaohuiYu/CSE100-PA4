@@ -54,16 +54,14 @@ int main(int argc, char* argv[]){
     }
     if (record.size() != 2){
 	// We should have exactly 2 columns
-	cout << "record.size: " << record.size() << endl;
 	continue;
     }
     string actor1 = record[0];
     string actor2 = record[1];
-    cout << "argv[4]: " << argv[4] << endl;
+ 
     // Using widest path alg
     string arg4 = argv[4];
     if (arg4 == "widestp"){
-	 cout << "about to call search" << endl;
       graph->search(actor1, actor2, stream, "w", true);
     }
     else{
