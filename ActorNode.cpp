@@ -16,6 +16,8 @@ ActorNode::ActorNode(std::string name){
   prevMovieWeight = 2147483647;
   totalDist = 2147483647;
   bandwidth = 0;
+  rank = 1;
+  prevMovieYear = 0;
 }
 
 /* Destructor */

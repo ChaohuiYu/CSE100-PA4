@@ -255,3 +255,16 @@ void ActorGraph::reset(){
     tmp->bandwidth = 0;
   }
 }
+
+ActorGraph::~ActorGraph(){
+  ////while (!actorGraph.empty()){
+    actorGraph.erase(actorGraph.begin(),actorGraph.end()); 
+	//cout << "nah" << endl;
+  //} 
+  //while (!movieGraph.empty()){
+    movieGraph.erase(movieGraph.begin(), movieGraph.end());
+//	cout << "yooo" << endl;
+  //}
+  //delete actorGraph;
+  //delete movieGraph;
+}

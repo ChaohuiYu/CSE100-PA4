@@ -49,6 +49,7 @@ class ActorGraph {
 	unordered_map<string, Movie*> movieGraph;
         
         ActorGraph(void);
+	~ActorGraph();
 
 	/* Fills adjecency list */
 	void search(string one, string two, ofstream& outfile, string version, bool connections);

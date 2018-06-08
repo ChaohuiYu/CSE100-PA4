@@ -1,4 +1,5 @@
 #include "ActorGraph.h"
+#include "UnionFind.hpp"
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -11,12 +12,22 @@ int main(int argc, char* argv[]){
     std::cout << "No input file\n";
     return 0;
   }
+  // Which kind of algorithm we are using
+  string arg4 = argv[4];
 
   ActorGraph *graph = new ActorGraph();
-  graph->loadFromFile(argv[1],"w");
+  UnionFind *ufind = new UnionFind();
 
-  // Reading in from file 
-  
+  // ActorGraph if using widestp
+  if (arg4 == "widestp"){
+    graph->loadFromFile(argv[1],"w");
+  }
+  // else using ufind
+  else if (arg4 == "ufind"){
+    ufind->loadFromFile(argv[1]);
+  }
+
+  // Reading in from file   
   ifstream infile(argv[2]);
   ofstream stream; // Ofstream
   stream.open(argv[3], ios::out);
@@ -60,9 +71,11 @@ int main(int argc, char* argv[]){
     string actor2 = record[1];
  
     // Using widest path alg
-    string arg4 = argv[4];
     if (arg4 == "widestp"){
       graph->search(actor1, actor2, stream, "w", true);
+    }
+    else if (arg4 == "ufind"){
+      ufind->usearch(actor1, actor2, stream);
     }
     else{
       cout << "didn't go into search" << endl;
@@ -76,5 +89,8 @@ int main(int argc, char* argv[]){
   infile.close();
   stream.close();
 
+  delete graph;
+  delete ufind;
+  
   return 0;
 }
