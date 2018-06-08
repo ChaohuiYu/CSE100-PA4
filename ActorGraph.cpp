@@ -266,5 +266,4 @@ ActorGraph::~ActorGraph(){
 //	cout << "yooo" << endl;
   //}
   //delete actorGraph;
-  //delete movieGraph;
 }

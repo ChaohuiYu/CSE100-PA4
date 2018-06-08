@@ -43,6 +43,9 @@ class UnionFind{
     /* Resets the pq */
     void reset();
 
+    /* Destructor */
+    ~UnionFind();
+
 
     /** You can modify this method definition as you wish
      *
@@ -206,4 +209,9 @@ void UnionFind::usearch(string one, string two, ofstream& file){
       return;
     }
   }
+}
+
+UnionFind::~UnionFind(){
+  actorGraph.erase(actorGraph.begin(), actorGraph.end());
+  movieGraph.erase(movieGraph.begin(), movieGraph.end());
 }
